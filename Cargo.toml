@@ -1,0 +1,11 @@
+[package]
+name = "debounced"
+version = "0.1.0"
+authors = ["Andrew Dona-Couch <debounced@andrewcou.ch>"]
+edition = "2018"
+
+[dependencies]
+embedded-hal = { version = "0.2", features = ["unproven"] }
+
+[dev-dependencies]
+embedded-hal-mock = "0.7"
