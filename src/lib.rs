@@ -415,6 +415,7 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
     /// # let input_pin = PinType;
     /// let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
     /// ```
+    #[inline]
     pub unsafe fn init(&self, pin: Pin) -> Result<Debounced<Cfg>, InitError> {
         // TODO: this would be great as a static assert if we could.
         assert!(
@@ -498,6 +499,7 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
     ///     DEBOUNCER.poll().unwrap();
     /// }
     /// ```
+    #[inline]
     pub unsafe fn poll(&self) -> Result<(), PollError<Pin::Error>> {
         // TODO: can we make this safe with a mutex bit?
         // is that hair-brained? hare-brained? whatever
@@ -570,6 +572,7 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
     /// guarantees that main application code never preempts an
     /// interrupt service routine, and you disable interrupts before
     /// calling it, this will be safe.
+    #[inline]
     pub unsafe fn deinit<'a>(&self, pin: Debounced<'a, Cfg>) -> Result<Pin, DeinitError<'a, Cfg>> {
         self.deinit_linted(pin)
     }
@@ -613,7 +616,7 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
         Ok(pin)
     }
 
-    #[inline(always)]
+    #[inline]
     fn init_flag(&self) -> bool {
         let state_ptr = self.storage.get();
         // This is safe because the read is atomic.
