@@ -10,11 +10,21 @@
 //! Kenneth A. Kuhn in [a code sample on his website][1].  You are
 //! highly recommended to read the code comments there.
 //!
+//! - [Documentation](https://docs.rs/debounced)
+//! - [Repository](https://git.sr.ht/~couchand/debounced)
+//!
+//! # Minimum supported Rust version
+//!
+//! This crate makes use of trait bounds on a `const fn`, which is
+//! currently unstable.  Therefore, we require use of the nightly
+//! compiler.  When [rust-lang/rust#67792][2] stabilizes, we will
+//! establish a MSRV policy.
+//!
 //! # Usage
 //!
 //! You need to bring just a few things:
 //!
-//! - An [`InputPin`][2], perhaps provided by a peripheral access crate
+//! - An [`InputPin`][3], perhaps provided by a peripheral access crate
 //!   (PAC) or hardware abstraction layer (HAL) for your chip.
 //! - An implementation of the [`Debounce`](Debounce) trait, maybe just
 //!   one from the [`default`](default) module.
@@ -27,8 +37,14 @@
 //!   polling, you'll want this to be a `static`.
 //!
 //! Once you've worked out these details,  the `debounced` crate will
-//! take care of the rest.  Your implementation will consist of three
-//! major steps:
+//! take care of the rest.
+//!
+//! ```toml
+//! [dependencies]
+//! debounced = "0.1"
+//! ```
+//!
+//! Your implementation will consist of three major steps:
 //!
 //! ## Create the debouncer.
 //!
@@ -108,8 +124,8 @@
 //!
 //! [0]: https://github.com/rust-embedded/embedded-hal
 //! [1]: http://www.kennethkuhn.com/electronics/debounce.c
-//! [2]: https://docs.rs/embedded-hal/0.2.4/embedded_hal/digital/v2/trait.InputPin.html
-//! [3]: https://github.com/rust-embedded/svd2rust
+//! [2]: https://github.com/rust-lang/rust/issues/67792
+//! [3]: https://docs.rs/embedded-hal/0.2.4/embedded_hal/digital/v2/trait.InputPin.html
 
 #![no_std]
 #![deny(missing_docs)]
