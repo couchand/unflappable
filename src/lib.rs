@@ -84,8 +84,11 @@
 //! # }
 //! # use debounced::{debouncer_uninit, Debouncer, default::ActiveLow};
 //! # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
-//! # let input_pin = PinType;
-//! let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
+//! # fn main() -> Result<(), debounced::InitError> {
+//! #     let input_pin = PinType;
+//! let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }?;
+//! #     Ok(())
+//! # }
 //! ```
 //!
 //! See the docs on the [`init()`](Debounce#method.init) method for
@@ -112,9 +115,12 @@
 //! # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
 //! # let input_pin = PinType;
 //! # let _ = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
+//! # fn main() -> Result<(), debounced::PollError<core::convert::Infallible>> {
 //! unsafe {
-//!     DEBOUNCER.poll().unwrap();
+//!     DEBOUNCER.poll()?;
 //! }
+//! #    Ok(())
+//! # }
 //! ```
 //!
 //! Again, see the docs on the relevant method for safety information.
@@ -366,8 +372,11 @@ impl<'a, Cfg: Debounce> core::fmt::Debug for DeinitError<'a, Cfg> {
 /// # }
 /// # use debounced::{debouncer_uninit, Debouncer, default::ActiveLow};
 /// # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
-/// # let input_pin = PinType;
-/// let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
+/// # fn main() -> Result<(), debounced::InitError> {
+/// #     let input_pin = PinType;
+/// let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }?;
+/// #     Ok(())
+/// # }
 /// ```
 ///
 /// Finally, make sure to arrange for regular polling of the `Debouncer`.
@@ -387,9 +396,12 @@ impl<'a, Cfg: Debounce> core::fmt::Debug for DeinitError<'a, Cfg> {
 /// # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
 /// # let input_pin = PinType;
 /// # let _ = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
+/// # fn main() -> Result<(), debounced::PollError<core::convert::Infallible>> {
 /// unsafe {
-///     DEBOUNCER.poll().unwrap();
+///     DEBOUNCER.poll()?;
 /// }
+/// #     Ok(())
+/// # }
 /// ```
 pub struct Debouncer<Pin, Cfg: Debounce> {
     cfg: PhantomData<Cfg>,
@@ -429,8 +441,11 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
     /// # }
     /// # use debounced::{debouncer_uninit, Debouncer, default::ActiveLow};
     /// # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
-    /// # let input_pin = PinType;
-    /// let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
+    /// # fn main() -> Result<(), debounced::InitError> {
+    /// #     let input_pin = PinType;
+    /// let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }?;
+    /// #     Ok(())
+    /// # }
     /// ```
     #[inline]
     pub unsafe fn init(&self, pin: Pin) -> Result<Debounced<Cfg>, InitError> {
@@ -512,9 +527,12 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
     /// # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
     /// # let input_pin = PinType;
     /// # let _ = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
+    /// # fn main() -> Result<(), debounced::PollError<core::convert::Infallible>> {
     /// unsafe {
-    ///     DEBOUNCER.poll().unwrap();
+    ///     DEBOUNCER.poll()?;
     /// }
+    /// #     Ok(())
+    /// # }
     /// ```
     #[inline]
     pub unsafe fn poll(&self) -> Result<(), PollError<Pin::Error>> {
