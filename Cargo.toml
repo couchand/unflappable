@@ -3,6 +3,11 @@ name = "debounced"
 version = "0.1.0"
 authors = ["Andrew Dona-Couch <debounced@andrewcou.ch>"]
 edition = "2018"
+description = "A batteries-included embedded-hal InputPin debouncer."
+license = "MIT"
+repository = "https://git.sr.ht/~couch/debounced"
+keywords = ["embedded-hal", "no-std", "debounce"]
+categories = ["embedded"]
 
 [dependencies]
 embedded-hal = { version = "0.2", features = ["unproven"] }
