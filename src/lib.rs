@@ -562,6 +562,7 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
     /// For technical reasons, you must pass in the zero value of the
     /// storage type [`Debounce::Storage`](Debounce#associatedtype.Storage),
     /// so prefer the macro [`debouncer_uninit!`](debouncer_uninit).
+    #[inline]
     pub const fn uninit(zero: Cfg::Storage) -> Self {
         Debouncer {
             cfg: PhantomData,
