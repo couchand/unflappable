@@ -130,6 +130,7 @@
 #![no_std]
 #![deny(missing_docs)]
 #![feature(const_fn)]
+#![doc(html_root_url = "https://docs.rs/debounced/0.1.0")]
 
 use core::cell::UnsafeCell;
 use core::convert::Infallible;
