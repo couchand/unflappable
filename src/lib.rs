@@ -23,28 +23,24 @@ use core::cell::UnsafeCell;
 use core::convert::Infallible;
 use core::marker::PhantomData;
 use core::mem::MaybeUninit;
-use core::ops::{
-    AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, Not,
-    Shl, SubAssign,
-};
+use core::ops::{AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, Not, Shl, SubAssign};
 
 use embedded_hal::digital::v2::InputPin;
 
 /// Static configuration of the debouncing algorithm.
 pub trait Debounce {
     /// The storage type of the state.  For most usages, `u8` is plenty.
-    type Storage:
-        From<u8> +
-        BitAnd<Output = Self::Storage> +
-        BitAndAssign +
-        BitOr<Output = Self::Storage> +
-        BitOrAssign +
-        Not<Output = Self::Storage> +
-        Shl<u8, Output = Self::Storage> +
-        AddAssign +
-        SubAssign +
-        Eq +
-        Copy;
+    type Storage: From<u8>
+        + BitAnd<Output = Self::Storage>
+        + BitAndAssign
+        + BitOr<Output = Self::Storage>
+        + BitOrAssign
+        + Not<Output = Self::Storage>
+        + Shl<u8, Output = Self::Storage>
+        + AddAssign
+        + SubAssign
+        + Eq
+        + Copy;
 
     /// The number of samples required to mark a state change.
     ///
@@ -181,7 +177,7 @@ pub enum DeinitError<'a, Cfg: Debounce> {
     Init,
 
     /// The provided pin does not match this `Debouncer`.
-    Pin(Debounced<'a, Cfg>)
+    Pin(Debounced<'a, Cfg>),
 }
 
 impl<'a, Cfg: Debounce> core::fmt::Debug for DeinitError<'a, Cfg> {
@@ -273,7 +269,7 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
         // It is always safe to write to a MaybeUninit pointer.
         unsafe {
             pin_ptr.write(pin);
-        } 
+        }
 
         // TODO: should this be moved to intepretation side?
         let mut new_state = if Cfg::INIT_HIGH {
@@ -286,7 +282,9 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
         let state_ptr = self.storage.get();
         // This is safe because we demand from the caller that this
         // method completes before any call to `poll()`.
-        unsafe { *state_ptr = new_state; }
+        unsafe {
+            *state_ptr = new_state;
+        }
 
         Ok(Debounced {
             cfg: PhantomData,
@@ -394,7 +392,8 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
             if self.integrator_is_zero() {
                 self.clear_state_flag();
             }
-        } else { // TODO: should this check if pin is high?
+        } else {
+            // TODO: should this check if pin is high?
             self.increment_integrator();
 
             if self.integrator_is_max() {
@@ -501,7 +500,7 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
 macro_rules! debouncer_uninit {
     () => {
         $crate::Debouncer::uninit(0)
-    }
+    };
 }
 
 /// A debounced pin.
