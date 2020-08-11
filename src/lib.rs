@@ -2,18 +2,114 @@
 //!
 //! Even digital input signals can be noisy.  The example usually cited
 //! is the flapping of physical contacts in a button or switch, but RF
-//! line noise can also cause digital input signals to bounce.
+//! line noise can also cause digital input signals to bounce.  Robust
+//! devices and embedded systems must debounce inputs.
 //!
 //! This crate is a batteries-included [`embedded-hal`][0] `InputPin`
 //! debouncer, using the integration-based algorithm described by
-//! Kenneth A. Kuhn in [a code sample on his website][1].
+//! Kenneth A. Kuhn in [a code sample on his website][1].  You are
+//! highly recommended to read the code comments there.
 //!
 //! # Usage
 //!
-//! TODO
+//! You need to bring just a few things:
+//!
+//! - An [`InputPin`][2], perhaps provided by a peripheral access crate
+//!   (PAC) or hardware abstraction layer (HAL) for your chip.
+//! - An implementation of the [`Debounce`](Debounce) trait, maybe just
+//!   one from the [`default`](default) module.
+//! - Some way to regularly call the [`poll()`](Debouncer#method.poll)
+//!   method at about the right frequency (where "right" means "roughly
+//!   consistent with the assumptions made in the `Debounce` trait
+//!   implementation").  This may be an interrupt service routine (ISR),
+//!   or it could just be a spin-delayed call from your main loop.
+//! - Storage for the debounce state.  If you're using an ISR for
+//!   polling, you'll want this to be a `static`.
+//!
+//! Once you've worked out these details,  the `debounced` crate will
+//! take care of the rest.  Your implementation will consist of three
+//! major steps:
+//!
+//! ## Create the debouncer.
+//!
+//! If you're storing state in a `static`, that might be:
+//!
+//! ```
+//! # struct PinType;
+//! # impl embedded_hal::digital::v2::InputPin for PinType {
+//! #     type Error = core::convert::Infallible;
+//! #     fn is_high(&self) -> Result<bool, Self::Error> {
+//! #         Ok(true)
+//! #     }
+//! #     fn is_low(&self) -> Result<bool, Self::Error> {
+//! #         Ok(false)
+//! #     }
+//! # }
+//! use debounced::{debouncer_uninit, Debouncer, default::ActiveLow};
+//! static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
+//! ```
+//!
+//! ## Initialize the debouncer.
+//!
+//! Next, initialize the [`Debouncer`](Debouncer).  You pass in the
+//! input pin and get back the debounced pin.  If you're storing state
+//! in a `static`, that might look like this:
+//!
+//! ```
+//! # struct PinType;
+//! # impl embedded_hal::digital::v2::InputPin for PinType {
+//! #     type Error = core::convert::Infallible;
+//! #     fn is_high(&self) -> Result<bool, Self::Error> {
+//! #         Ok(true)
+//! #     }
+//! #     fn is_low(&self) -> Result<bool, Self::Error> {
+//! #         Ok(false)
+//! #     }
+//! # }
+//! # use debounced::{debouncer_uninit, Debouncer, default::ActiveLow};
+//! # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
+//! # let input_pin = PinType;
+//! let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
+//! ```
+//!
+//! See the docs on the [`init()`](Debounce#method.init) method for
+//! safety details.  Generally, if you haven't yet enabled interrupts
+//! you'll be fine.
+//!
+//! ## Poll the debouncer.
+//!
+//! On a regular basis, make a call to the [`poll()`](Debouncer#method.poll)
+//! method of `Debouncer`, which might look like this:
+//!
+//! ```
+//! # struct PinType;
+//! # impl embedded_hal::digital::v2::InputPin for PinType {
+//! #     type Error = core::convert::Infallible;
+//! #     fn is_high(&self) -> Result<bool, Self::Error> {
+//! #         Ok(true)
+//! #     }
+//! #     fn is_low(&self) -> Result<bool, Self::Error> {
+//! #         Ok(false)
+//! #     }
+//! # }
+//! # use debounced::{debouncer_uninit, Debouncer, default::ActiveLow};
+//! # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
+//! # let input_pin = PinType;
+//! # let _ = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
+//! unsafe {
+//!     DEBOUNCER.poll().unwrap();
+//! }
+//! ```
+//!
+//! Again, see the docs on the relevant method for safety information.
+//! The main idea here is that you should only ever `poll()` from one
+//! place in your code.  We'd use a `&mut` reference, but, well, it's
+//! in static storage.
 //!
 //! [0]: https://github.com/rust-embedded/embedded-hal
 //! [1]: http://www.kennethkuhn.com/electronics/debounce.c
+//! [2]: https://docs.rs/embedded-hal/0.2.4/embedded_hal/digital/v2/trait.InputPin.html
+//! [3]: https://github.com/rust-embedded/svd2rust
 
 #![no_std]
 #![deny(missing_docs)]
@@ -29,7 +125,8 @@ use embedded_hal::digital::v2::InputPin;
 
 /// Static configuration of the debouncing algorithm.
 pub trait Debounce {
-    /// The storage type of the state.  For most usages, `u8` is plenty.
+    /// The storage type of the state.  For most usages, `u8` is plenty
+    /// big enough.  You almost certainly don't need more than a `u8`.
     type Storage: From<u8>
         + BitAnd<Output = Self::Storage>
         + BitAndAssign
@@ -46,18 +143,17 @@ pub trait Debounce {
     /// The number of samples required to mark a state change.
     ///
     /// Unlike many debouncing algorithms, the integration approach
-    /// doesn't require a fixed number of samples in a row.  Rather,
-    /// if a given window of samples sees `n` of the new state and `m`
-    /// of the old state, a transition will be marked if the difference
-    /// `n - m` reaches `MAX_COUNT`.
+    /// doesn't require a fixed number of consistent samples in a row.
+    /// Rather, if in `n + m` samples we see `n` of the new state and
+    /// `m` of the old state, a transition will be marked if the
+    /// difference `n - m` reaches `MAX_COUNT`.
     ///
     /// This should be configured based on the following formula: if
     /// `d` is the minimum debounce delay (in seconds), and `f` is the
     /// number of times the debouncer is polled per second, the
-    /// `MAX_COUNT` should be set to the product `d * f`.
-    ///
-    /// For instance, if polling 100 times a second (100 Hz), with a
-    /// minimum delay of 50 milliseconds, set this to 5.
+    /// `MAX_COUNT` should be set to the product `d * f`. For instance,
+    /// if polling 100 times a second (100 Hz), with a minimum delay of
+    /// 50 milliseconds, set this to 5.
     ///
     /// *Note:* this must be non zero, and must be represented in two
     /// bits fewer than the storage you provide (e.g. if using `u8`,
@@ -118,8 +214,8 @@ impl<D: Debounce> DebounceExt for D {
 
 /// Some default configurations.
 ///
-/// These provide reasonable defaults for the common case of button or
-/// switch contact flapping debouncing.
+/// These provide reasonable defaults for the common case of debouncing
+/// the contact flapping on a physical button or switch.
 pub mod default {
     /// A reasonable default active-high configuration.
     ///
@@ -154,9 +250,28 @@ pub mod default {
         /// Since the switch is active low, `INIT_HIGH` is true.
         const INIT_HIGH: bool = true;
     }
-}
 
-// TODO: error traits for errors
+    /// The settings in Kenneth A. Kuhn's [code fragment][0].
+    ///
+    /// If the debounced pin is polled every 100ms (10Hz), the minimum
+    /// delay is 300ms.
+    ///
+    /// [0]: http://www.kennethkuhn.com/electronics/debounce.c
+    pub struct OriginalKuhn;
+
+    impl super::Debounce for OriginalKuhn {
+        /// For most usages, `u8` is plenty.
+        type Storage = u8;
+
+        /// With a `MAX_COUNT` of 3, the minimum delay is 300ms at 10Hz.
+        const MAX_COUNT: Self::Storage = 3;
+
+        /// Kuhn's code fragment doesn't included initialization code,
+        /// so we've just used a default of false consistent with the
+        /// comments.
+        const INIT_HIGH: bool = false;
+    }
+}
 
 /// An error indicating that once-only initialization has been violated.
 #[derive(Debug)]
@@ -165,7 +280,8 @@ pub struct InitError;
 /// An error that arose during polling.
 #[derive(Debug)]
 pub enum PollError<PinError> {
-    /// The `Debouncer` was polled before `init()` completed.
+    /// The `Debouncer` was polled before the call to
+    /// [`init()`](Debouncer#method.init) completed.
     Init,
 
     /// An error polling the underlying pin.
@@ -215,6 +331,49 @@ impl<'a, Cfg: Debounce> core::fmt::Debug for DeinitError<'a, Cfg> {
 /// use debounced::{debouncer_uninit, Debouncer, default::ActiveLow};
 /// static PIN_DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
 /// ```
+///
+/// Later, in your main application code, you can initialize it with
+/// the relevant input pin.  This returns the [`Debounced`](Debounced)
+/// pin for your use.
+///
+/// ```
+/// # struct PinType;
+/// # impl embedded_hal::digital::v2::InputPin for PinType {
+/// #     type Error = core::convert::Infallible;
+/// #     fn is_high(&self) -> Result<bool, Self::Error> {
+/// #         Ok(true)
+/// #     }
+/// #     fn is_low(&self) -> Result<bool, Self::Error> {
+/// #         Ok(false)
+/// #     }
+/// # }
+/// # use debounced::{debouncer_uninit, Debouncer, default::ActiveLow};
+/// # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
+/// # let input_pin = PinType;
+/// let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
+/// ```
+///
+/// Finally, make sure to arrange for regular polling of the `Debouncer`.
+///
+/// ```
+/// # struct PinType;
+/// # impl embedded_hal::digital::v2::InputPin for PinType {
+/// #     type Error = core::convert::Infallible;
+/// #     fn is_high(&self) -> Result<bool, Self::Error> {
+/// #         Ok(true)
+/// #     }
+/// #     fn is_low(&self) -> Result<bool, Self::Error> {
+/// #         Ok(false)
+/// #     }
+/// # }
+/// # use debounced::{debouncer_uninit, Debouncer, default::ActiveLow};
+/// # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
+/// # let input_pin = PinType;
+/// # let _ = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
+/// unsafe {
+///     DEBOUNCER.poll().unwrap();
+/// }
+/// ```
 pub struct Debouncer<Pin, Cfg: Debounce> {
     cfg: PhantomData<Cfg>,
     pin: UnsafeCell<MaybeUninit<Pin>>,
@@ -227,29 +386,35 @@ pub struct Debouncer<Pin, Cfg: Debounce> {
 unsafe impl<Pin, Cfg: Debounce> Sync for Debouncer<Pin, Cfg> {}
 
 impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
-    /// Create a new, uninitialized pin debouncer.
-    ///
-    /// For technical reasons, you must pass in the zero value of the
-    /// storage type [`Cfg::Storage`](Cfg#associatedtype.Storage), so
-    /// prefer the macro [`debouncer_uninit!`](debouncer_uninit).
-    pub const fn uninit(zero: Cfg::Storage) -> Self {
-        Debouncer {
-            cfg: PhantomData,
-            pin: UnsafeCell::new(MaybeUninit::uninit()),
-            storage: UnsafeCell::new(zero),
-        }
-    }
-
     /// Initialize the pin debouncer for a given input pin.
     ///
     /// Returns an error if the `Debouncer` has already be initialized.
     ///
     /// # Safety
     ///
-    /// For this call to be safe, you must ensure that there is no
-    /// chance that this code is preempted by something which makes a
-    /// call to [`poll()`](#method.poll).  The usual way to do this is
-    /// by calling `init()` before enabling interrupts.
+    /// For this call to be safe, you must ensure that it is not run
+    /// concurrently with a call to any unsafe method of this type,
+    /// including `init()` itself. The usual way to do this is by
+    /// calling `init()` once before enabling interrupts.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # struct PinType;
+    /// # impl embedded_hal::digital::v2::InputPin for PinType {
+    /// #     type Error = core::convert::Infallible;
+    /// #     fn is_high(&self) -> Result<bool, Self::Error> {
+    /// #         Ok(true)
+    /// #     }
+    /// #     fn is_low(&self) -> Result<bool, Self::Error> {
+    /// #         Ok(false)
+    /// #     }
+    /// # }
+    /// # use debounced::{debouncer_uninit, Debouncer, default::ActiveLow};
+    /// # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
+    /// # let input_pin = PinType;
+    /// let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
+    /// ```
     pub unsafe fn init(&self, pin: Pin) -> Result<Debounced<Cfg>, InitError> {
         // TODO: this would be great as a static assert if we could.
         assert!(
@@ -299,20 +464,109 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
         })
     }
 
+    /// Poll the pin debouncer.
+    ///
+    /// This should be done on a regular basis at roughly the frequency
+    /// used in the calculation of [`MAX_COUNT`](Debounce#associatedconstant.MAX_COUNT).
+    ///
+    /// # Safety
+    ///
+    /// For this method to be safe, you must ensure that it is not run
+    /// concurrently with a call to any unsafe method of this type,
+    /// including `poll()` itself.  The usual way to do this is to call
+    /// `poll()` from a single interrupt service routine, and not
+    /// enable interrupts until after the call to `init()` returns.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # struct PinType;
+    /// # impl embedded_hal::digital::v2::InputPin for PinType {
+    /// #     type Error = core::convert::Infallible;
+    /// #     fn is_high(&self) -> Result<bool, Self::Error> {
+    /// #         Ok(true)
+    /// #     }
+    /// #     fn is_low(&self) -> Result<bool, Self::Error> {
+    /// #         Ok(false)
+    /// #     }
+    /// # }
+    /// # use debounced::{debouncer_uninit, Debouncer, default::ActiveLow};
+    /// # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
+    /// # let input_pin = PinType;
+    /// # let _ = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
+    /// unsafe {
+    ///     DEBOUNCER.poll().unwrap();
+    /// }
+    /// ```
+    pub unsafe fn poll(&self) -> Result<(), PollError<Pin::Error>> {
+        // TODO: can we make this safe with a mutex bit?
+        // is that hair-brained? hare-brained? whatever
+
+        self.poll_linted()
+    }
+
+    // n.b. defined seperately to ensure that we think about unsafety.
+    #[inline(always)]
+    fn poll_linted(&self) -> Result<(), PollError<Pin::Error>> {
+        if !self.init_flag() {
+            return Err(PollError::Init);
+        }
+
+        let pin_cell_ptr = self.pin.get();
+        // This is safe because we only ever mutate in `init()`.
+        let pin_cell = unsafe { &*pin_cell_ptr };
+
+        let pin_ptr = pin_cell.as_ptr();
+        // This is safe because we've checked that init has completed.
+        let pin = unsafe { &*pin_ptr };
+
+        if pin.is_low().map_err(PollError::Pin)? {
+            self.decrement_integrator();
+
+            if self.integrator_is_zero() {
+                self.clear_state_flag();
+            }
+        } else {
+            // TODO: should this check if pin is high?
+            self.increment_integrator();
+
+            if self.integrator_is_max() {
+                self.set_state_flag();
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Create a new, uninitialized pin debouncer.
+    ///
+    /// For technical reasons, you must pass in the zero value of the
+    /// storage type [`Debounce::Storage`](Debounce#associatedtype.Storage),
+    /// so prefer the macro [`debouncer_uninit!`](debouncer_uninit).
+    pub const fn uninit(zero: Cfg::Storage) -> Self {
+        Debouncer {
+            cfg: PhantomData,
+            pin: UnsafeCell::new(MaybeUninit::uninit()),
+            storage: UnsafeCell::new(zero),
+        }
+    }
+
     /// Destroy the debounced pin, returning the original input pin.
     ///
     /// You must pass in the debounced pin produced from the call to
-    /// [`init()`](#method.init).
+    /// [`init()`](#method.init).  Returns an error if called with a
+    /// `Debounced` pin not associated with this `Debouncer`.
     ///
     /// Restores this `Debouncer` to the uninitialized state.
     ///
     /// # Safety
     ///
     /// For this method to be safe, you must ensure that it is not run
-    /// while a call to [`poll()`](#method.poll) is outstanding.
+    /// concurrently with a call to any unsafe method of this type,
+    /// including `deinit()` itself.
     ///
     /// If you only ever `poll()` in an interrupt service routine, you
-    /// call this in main application code, your architecture
+    /// call this method in main application code, your architecture
     /// guarantees that main application code never preempts an
     /// interrupt service routine, and you disable interrupts before
     /// calling it, this will be safe.
@@ -357,58 +611,6 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
         }
 
         Ok(pin)
-    }
-
-    /// Poll the pin debouncer.
-    ///
-    /// This should be done on a regular basis at roughly the frequency
-    /// used in the calculation of [`MAX_COUNT`](Debounce#associatedconstant.MAX_COUNT).
-    ///
-    /// # Safety
-    ///
-    /// For this method to be safe, you must ensure that it is not run
-    /// while a call to [`init()`](#method.init) is outstanding.
-    ///
-    /// The usual way to do this is to not enable interrupts until
-    /// after the call to `init()` returns.
-    pub unsafe fn poll(&self) -> Result<(), PollError<Pin::Error>> {
-        // TODO: can we make this safe with a mutex bit?
-        // is that hair-brained? hare-brained? whatever
-
-        self.poll_linted()
-    }
-
-    // n.b. defined seperately to ensure that we think about unsafety.
-    #[inline(always)]
-    fn poll_linted(&self) -> Result<(), PollError<Pin::Error>> {
-        if !self.init_flag() {
-            return Err(PollError::Init);
-        }
-
-        let pin_cell_ptr = self.pin.get();
-        // This is safe because we only ever mutate in `init()`.
-        let pin_cell = unsafe { &*pin_cell_ptr };
-
-        let pin_ptr = pin_cell.as_ptr();
-        // This is safe because we've checked that init has completed.
-        let pin = unsafe { &*pin_ptr };
-
-        if pin.is_low().map_err(PollError::Pin)? {
-            self.decrement_integrator();
-
-            if self.integrator_is_zero() {
-                self.clear_state_flag();
-            }
-        } else {
-            // TODO: should this check if pin is high?
-            self.increment_integrator();
-
-            if self.integrator_is_max() {
-                self.set_state_flag();
-            }
-        }
-
-        Ok(())
     }
 
     #[inline(always)]
@@ -487,6 +689,10 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
 
 /// Create a new uninitialized [`Debouncer`](Debouncer).
 ///
+/// This is the preferred way to initialize a static `Debouncer`.  Be
+/// sure to initialize it before doing anything else with it, or you'll
+/// get an error `Result`.
+///
 /// # Examples
 ///
 /// ```
@@ -512,8 +718,8 @@ macro_rules! debouncer_uninit {
 
 /// A debounced pin.
 ///
-/// Create this part where the pin will be used, perhaps in the main
-/// application code.
+/// This is what you'll use for downstream input processing, leveraging
+/// the methods provided by the trait [`InputPin`](#impl-InputPin).
 pub struct Debounced<'state, Cfg: Debounce> {
     cfg: PhantomData<Cfg>,
     storage: &'state UnsafeCell<Cfg::Storage>,
