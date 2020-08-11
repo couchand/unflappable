@@ -23,7 +23,7 @@ use core::cell::UnsafeCell;
 use core::convert::Infallible;
 use core::marker::PhantomData;
 use core::mem::MaybeUninit;
-use core::ops::{AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, Not, Shl, SubAssign};
+use core::ops::{AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, Not, Shl, Shr, SubAssign};
 
 use embedded_hal::digital::v2::InputPin;
 
@@ -37,6 +37,7 @@ pub trait Debounce {
         + BitOrAssign
         + Not<Output = Self::Storage>
         + Shl<u8, Output = Self::Storage>
+        + Shr<u8, Output = Self::Storage>
         + AddAssign
         + SubAssign
         + Eq
@@ -250,6 +251,12 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
     /// call to [`poll()`](#method.poll).  The usual way to do this is
     /// by calling `init()` before enabling interrupts.
     pub unsafe fn init(&self, pin: Pin) -> Result<Debounced<Cfg>, InitError> {
+        // TODO: this would be great as a static assert if we could.
+        assert!(
+            (Cfg::MAX_COUNT << 2) >> 2 == Cfg::MAX_COUNT,
+            "Debounce::MAX_COUNT must be represented in two bits fewer than Debounce::Storage"
+        );
+
         self.init_linted(pin)
     }
 
