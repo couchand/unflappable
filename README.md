@@ -1,4 +1,4 @@
-# debounce
+# unflappable
 
 A batteries-included [embedded-hal] [`InputPin`] debouncer.
 
@@ -14,7 +14,7 @@ A batteries-included [embedded-hal] [`InputPin`] debouncer.
 Create an uninitialized [`Debouncer`] in static storage.
 
 ```rust
-use debounce::{debouncer_uninit, Debouncer, default::ActiveLow};
+use unflappable::{debouncer_uninit, Debouncer, default::ActiveLow};
 static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
 ```
 
@@ -54,7 +54,7 @@ establish a MSRV policy.
 There are at least three debouncing crates targeting embedded Rust
 development.  How does this one compare to the others?
 
-Crate: `debounce`
+Crate: `unflappable`
 Wraps `InputPin`: **Yes**
 Can move wrapped pin: **Yes**
 Algorithm: Integration-based by [Kuhn]
@@ -87,13 +87,13 @@ and send any questions or patches to the [mailing list].  Pull requests
 to the GitHub mirror are also acceptable.
 
 [embedded-hal]: https://github.com/rust-embedded/embedded-hal
-[API Documentation]: https://docs.rs/debounce
+[API Documentation]: https://docs.rs/unflappable
 [rust-lang/rust#67792]: https://github.com/rust-lang/rust/issues/67792
-[`Debouncer`]: https://docs.rs/debounce/0.1.0/debounce/struct.Debouncer.html
-[`Debounced`]: https://docs.rs/debounce/0.1.0/debounce/struct.Debounced.html
+[`Debouncer`]: https://docs.rs/unflappable/0.1.0/unflappable/struct.Debouncer.html
+[`Debounced`]: https://docs.rs/unflappable/0.1.0/unflappable/struct.Debounced.html
 [`InputPin`]: https://docs.rs/embedded-hal/0.2.4/embedded_hal/digital/v2/trait.InputPin.html
-[issue tracker]: https://todo.sr.ht/~couch/debounce
-[mailing list]: https://lists.sr.ht/~couch/debounce-dev
+[issue tracker]: https://todo.sr.ht/~couch/unflappable
+[mailing list]: https://lists.sr.ht/~couch/unflappable-dev
 [Kuhn]: http://www.kennethkuhn.com/electronics/debounce.c
 [`debounced-pin`]: https://github.com/Winseven4lyf/rust-debounced-pin
 [Greensted]: http://www.labbookpages.co.uk/electronics/debounce.html#soft

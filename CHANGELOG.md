@@ -9,11 +9,11 @@ Like most crates in the Rust ecosystem this project adheres to
 
 ## [Unreleased]
 
-- Initial release of debouncer.
+- Initial release of `unflappable`.
 - Wraps the `InputPin`, returning a moveable `impl InputPin`.
 - Supports seamless static storage for use in an interrupt service
   routine.
 
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
-[Unreleased]: https://git.sr.ht/~couch/debounce/log
+[Unreleased]: https://git.sr.ht/~couch/unflappable/log

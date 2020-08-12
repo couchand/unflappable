@@ -1,11 +1,11 @@
 [package]
-name = "debounce"
+name = "unflappable"
 version = "0.1.0"
-authors = ["Andrew Dona-Couch <debounce@andrewcou.ch>"]
+authors = ["Andrew Dona-Couch <unflappable@andrewcou.ch>"]
 edition = "2018"
 description = "A batteries-included embedded-hal InputPin debouncer."
 license = "MIT"
-repository = "https://git.sr.ht/~couch/debounce"
+repository = "https://git.sr.ht/~couch/unflappable"
 keywords = ["embedded-hal", "no-std", "debounce"]
 categories = ["embedded"]
 

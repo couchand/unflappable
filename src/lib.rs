@@ -10,9 +10,9 @@
 //! Kenneth A. Kuhn in [a code sample on his website][1].  You are
 //! highly recommended to read the code comments there.
 //!
-//! - [Documentation](https://docs.rs/debounce)
-//! - [Repository](https://git.sr.ht/~couch/debounce)
-//! - [Changelog](https://git.sr.ht/~couch/debounce/tree/master/CHANGELOG.md)
+//! - [Documentation](https://docs.rs/unflappable)
+//! - [Repository](https://git.sr.ht/~couch/unflappable)
+//! - [Changelog](https://git.sr.ht/~couch/unflappable/tree/master/CHANGELOG.md)
 //!
 //! # Minimum supported Rust version
 //!
@@ -37,12 +37,12 @@
 //! - Storage for the debounce state.  If you're using an ISR for
 //!   polling, you'll want this to be a `static`.
 //!
-//! Once you've worked out these details,  the `debounce` crate will
+//! Once you've worked out these details,  the `unflappable` crate will
 //! take care of the rest.
 //!
 //! ```toml
 //! [dependencies]
-//! debounce = "0.1"
+//! unflappable = "0.1"
 //! ```
 //!
 //! Your implementation will consist of three major steps:
@@ -62,7 +62,7 @@
 //! #         Ok(false)
 //! #     }
 //! # }
-//! use debounce::{debouncer_uninit, Debouncer, default::ActiveLow};
+//! use unflappable::{debouncer_uninit, Debouncer, default::ActiveLow};
 //! static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
 //! ```
 //!
@@ -83,9 +83,9 @@
 //! #         Ok(false)
 //! #     }
 //! # }
-//! # use debounce::{debouncer_uninit, Debouncer, default::ActiveLow};
+//! # use unflappable::{debouncer_uninit, Debouncer, default::ActiveLow};
 //! # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
-//! # fn main() -> Result<(), debounce::InitError> {
+//! # fn main() -> Result<(), unflappable::InitError> {
 //! #     let input_pin = PinType;
 //! let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }?;
 //! #     Ok(())
@@ -112,11 +112,11 @@
 //! #         Ok(false)
 //! #     }
 //! # }
-//! # use debounce::{debouncer_uninit, Debouncer, default::ActiveLow};
+//! # use unflappable::{debouncer_uninit, Debouncer, default::ActiveLow};
 //! # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
 //! # let input_pin = PinType;
 //! # let _ = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
-//! # fn main() -> Result<(), debounce::PollError<core::convert::Infallible>> {
+//! # fn main() -> Result<(), unflappable::PollError<core::convert::Infallible>> {
 //! unsafe {
 //!     DEBOUNCER.poll()?;
 //! }
@@ -137,7 +137,7 @@
 #![no_std]
 #![deny(missing_docs)]
 #![feature(const_fn)]
-#![doc(html_root_url = "https://docs.rs/debounce/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/unflappable/0.1.0")]
 
 use core::cell::UnsafeCell;
 use core::convert::Infallible;
@@ -352,7 +352,7 @@ impl<'a, Cfg: Debounce> core::fmt::Debug for DeinitError<'a, Cfg> {
 /// #         Ok(false)
 /// #     }
 /// # }
-/// use debounce::{debouncer_uninit, Debouncer, default::ActiveLow};
+/// use unflappable::{debouncer_uninit, Debouncer, default::ActiveLow};
 /// static PIN_DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
 /// ```
 ///
@@ -371,9 +371,9 @@ impl<'a, Cfg: Debounce> core::fmt::Debug for DeinitError<'a, Cfg> {
 /// #         Ok(false)
 /// #     }
 /// # }
-/// # use debounce::{debouncer_uninit, Debouncer, default::ActiveLow};
+/// # use unflappable::{debouncer_uninit, Debouncer, default::ActiveLow};
 /// # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
-/// # fn main() -> Result<(), debounce::InitError> {
+/// # fn main() -> Result<(), unflappable::InitError> {
 /// #     let input_pin = PinType;
 /// let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }?;
 /// #     Ok(())
@@ -393,11 +393,11 @@ impl<'a, Cfg: Debounce> core::fmt::Debug for DeinitError<'a, Cfg> {
 /// #         Ok(false)
 /// #     }
 /// # }
-/// # use debounce::{debouncer_uninit, Debouncer, default::ActiveLow};
+/// # use unflappable::{debouncer_uninit, Debouncer, default::ActiveLow};
 /// # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
 /// # let input_pin = PinType;
 /// # let _ = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
-/// # fn main() -> Result<(), debounce::PollError<core::convert::Infallible>> {
+/// # fn main() -> Result<(), unflappable::PollError<core::convert::Infallible>> {
 /// unsafe {
 ///     DEBOUNCER.poll()?;
 /// }
@@ -440,9 +440,9 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
     /// #         Ok(false)
     /// #     }
     /// # }
-    /// # use debounce::{debouncer_uninit, Debouncer, default::ActiveLow};
+    /// # use unflappable::{debouncer_uninit, Debouncer, default::ActiveLow};
     /// # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
-    /// # fn main() -> Result<(), debounce::InitError> {
+    /// # fn main() -> Result<(), unflappable::InitError> {
     /// #     let input_pin = PinType;
     /// let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }?;
     /// #     Ok(())
@@ -524,11 +524,11 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
     /// #         Ok(false)
     /// #     }
     /// # }
-    /// # use debounce::{debouncer_uninit, Debouncer, default::ActiveLow};
+    /// # use unflappable::{debouncer_uninit, Debouncer, default::ActiveLow};
     /// # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
     /// # let input_pin = PinType;
     /// # let _ = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
-    /// # fn main() -> Result<(), debounce::PollError<core::convert::Infallible>> {
+    /// # fn main() -> Result<(), unflappable::PollError<core::convert::Infallible>> {
     /// unsafe {
     ///     DEBOUNCER.poll()?;
     /// }
@@ -746,7 +746,7 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
 /// #         Ok(false)
 /// #     }
 /// # }
-/// use debounce::{debouncer_uninit, Debouncer, default::ActiveLow};
+/// use unflappable::{debouncer_uninit, Debouncer, default::ActiveLow};
 /// static PIN_DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
 /// ```
 #[macro_export]
