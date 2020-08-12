@@ -893,37 +893,43 @@ mod test {
         assert_eq!(true, debounced.is_low().unwrap());
         assert_eq!(false, debounced.is_high().unwrap());
 
+        // This is safe since this is the only test using this Debouncer.
         unsafe { SIMPLE_STATIC_TEST.poll() }.unwrap();
 
         assert_eq!(true, debounced.is_low().unwrap());
         assert_eq!(false, debounced.is_high().unwrap());
 
+        // This is safe since this is the only test using this Debouncer.
         unsafe { SIMPLE_STATIC_TEST.poll() }.unwrap();
 
         assert_eq!(true, debounced.is_low().unwrap());
         assert_eq!(false, debounced.is_high().unwrap());
 
+        // This is safe since this is the only test using this Debouncer.
         unsafe { SIMPLE_STATIC_TEST.poll() }.unwrap();
 
         assert_eq!(false, debounced.is_low().unwrap());
         assert_eq!(true, debounced.is_high().unwrap());
 
+        // This is safe since this is the only test using this Debouncer.
         unsafe { SIMPLE_STATIC_TEST.poll() }.unwrap();
 
         assert_eq!(false, debounced.is_low().unwrap());
         assert_eq!(true, debounced.is_high().unwrap());
 
+        // This is safe since this is the only test using this Debouncer.
         unsafe { SIMPLE_STATIC_TEST.poll() }.unwrap();
 
         assert_eq!(false, debounced.is_low().unwrap());
         assert_eq!(true, debounced.is_high().unwrap());
 
+        // This is safe since this is the only test using this Debouncer.
         unsafe { SIMPLE_STATIC_TEST.poll() }.unwrap();
 
         assert_eq!(true, debounced.is_low().unwrap());
         assert_eq!(false, debounced.is_high().unwrap());
 
-        // This is safe because this is the only test using this Debouncer.
+        // This is safe since this is the only test using this Debouncer.
         let mut pin = unsafe { SIMPLE_STATIC_TEST.deinit(debounced) }.unwrap();
         pin.done();
     }
