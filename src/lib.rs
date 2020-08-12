@@ -11,7 +11,7 @@
 //! highly recommended to read the code comments there.
 //!
 //! - [Documentation](https://docs.rs/debounce)
-//! - [Repository](https://git.sr.ht/~couchand/debounce)
+//! - [Repository](https://git.sr.ht/~couch/debounce)
 //!
 //! # Minimum supported Rust version
 //!
