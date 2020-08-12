@@ -30,7 +30,7 @@ Initialize the `Debouncer` with your input pin, returning the
 [`InputPin`], such as passing ownership to another abstraction.
 
 ```rust
-let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
+let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }?;
 ```
 
 Regularly poll the `Debouncer`, perhaps in an interrupt service routine.
