@@ -61,29 +61,26 @@ establish a MSRV policy.
 There are at least three debouncing crates targeting embedded Rust
 development.  How does this one compare to the others?
 
-Crate: `unflappable`
-Wraps `InputPin`: **Yes**
-Can move wrapped pin: **Yes**
-Algorithm: Integration-based by [Kuhn]
-State overhead: `u8`
-
-Crate: [`debounced-pin`]
-Wraps `InputPin`: **Yes**
-Can move wrapped pin: No
-Algorithm: Differentiation-based by [Greensted]
-State overhead: `u8` + `enum`
-
-Crate: [`debouncr`]
-Wraps `InputPin`: No
-Can move wrapped pin: N/A
-Algorithm: Differentiation-based by [Ganssle]
-State overhead: `u8`
-
-Crate: [`debouncing`]
-Wraps `InputPin`: No
-Can move wrapped pin: N/A
-Algorithm: Differentiation-based by [Hackaday]
-State overhead: `u8` + dynamically-allocated `Vec`
+- Crate: `unflappable`
+  - Wraps `InputPin`: **Yes**
+  - Can move wrapped pin: **Yes**
+  - Algorithm: Integration-based by [Kuhn]
+  - State overhead: `u8`
+- Crate: [`debounced-pin`]
+  - Wraps `InputPin`: **Yes**
+  - Can move wrapped pin: No
+  - Algorithm: Differentiation-based by [Greensted]
+  - State overhead: `u8` + `enum`
+- Crate: [`debouncr`]
+  - Wraps `InputPin`: No
+  - Can move wrapped pin: N/A
+  - Algorithm: Differentiation-based by [Ganssle]
+  - State overhead: `u8`
+- Crate: [`debouncing`]
+  - Wraps `InputPin`: No
+  - Can move wrapped pin: N/A
+  - Algorithm: Differentiation-based by [Hackaday]
+  - State overhead: `u8` + dynamically-allocated `Vec`
 
 ## Contributing
 
