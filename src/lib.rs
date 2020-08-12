@@ -860,7 +860,7 @@ mod test {
         assert_eq!(true, debounced.is_low().unwrap());
         assert_eq!(false, debounced.is_high().unwrap());
 
-        // It is always safe to deinit a stack-scopted Debouncer.
+        // It is always safe to deinit a stack-scoped Debouncer.
         let mut pin = unsafe { debouncer.deinit(debounced) }.unwrap();
         pin.done();
     }
