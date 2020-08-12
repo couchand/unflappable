@@ -450,7 +450,11 @@ impl<Pin: InputPin, Cfg: Debounce> Debouncer<Pin, Cfg> {
     /// ```
     #[inline]
     pub unsafe fn init(&self, pin: Pin) -> Result<Debounced<Cfg>, InitError> {
-        // TODO: this would be great as a static assert if we could.
+        // TODO: these would be great as static asserts if we could.
+        assert!(
+            Cfg::MAX_COUNT != Cfg::zero(),
+            "Debounce::MAX_COUNT cannot be zero"
+        );
         assert!(
             (Cfg::MAX_COUNT << 2) >> 2 == Cfg::MAX_COUNT,
             "Debounce::MAX_COUNT must be represented in two bits fewer than Debounce::Storage"
