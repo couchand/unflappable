@@ -12,6 +12,7 @@
 //!
 //! - [Documentation](https://docs.rs/debounce)
 //! - [Repository](https://git.sr.ht/~couch/debounce)
+//! - [Changelog](https://git.sr.ht/~couch/debounce/tree/master/CHANGELOG.md)
 //!
 //! # Minimum supported Rust version
 //!
