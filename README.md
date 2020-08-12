@@ -11,6 +11,13 @@ A batteries-included [embedded-hal] [`InputPin`] debouncer.
 
 ## Quickstart
 
+Add the following to your `Cargo.toml`:
+
+```toml
+[dependencies]
+unflappable = "0.1"
+```
+
 Create an uninitialized [`Debouncer`] in static storage.
 
 ```rust
