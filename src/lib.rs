@@ -28,10 +28,12 @@
 //! - An implementation of the [`Debounce`](Debounce) trait, maybe just
 //!   one from the [`default`](default) module.
 //! - Some way to regularly call the [`poll()`](Debouncer#method.poll)
-//!   method at about the right frequency (where "right" means "roughly
-//!   consistent with the assumptions made in the `Debounce` trait
-//!   implementation").  This may be an interrupt service routine (ISR),
-//!   or it could just be a spin-delayed call from your main loop.
+//!   method at about the right frequency (where "right" depends on the
+//!   `Debounce` trait implementation, about 100Hz for
+//!   [`default::ActiveHigh`](default/struct.ActiveHigh.html) or
+//!   [`default::ActiveLow`](default/struct.ActiveLow.html)).
+//!   This may be done in an interrupt service routine (ISR),
+//!   or it could be a spin-delayed call from your main loop.
 //! - Storage for the debounce state.  If you're using an ISR for
 //!   polling, you'll want this to be a `static`.
 //!
