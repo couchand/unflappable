@@ -74,13 +74,23 @@
 //!
 //! ```
 //! # struct PinType;
-//! # impl embedded_hal::digital::v2::InputPin for PinType {
+//! # use embedded_hal::digital::v2::{InputPin, OutputPin};
+//! # impl InputPin for PinType {
 //! #     type Error = core::convert::Infallible;
 //! #     fn is_high(&self) -> Result<bool, Self::Error> {
 //! #         Ok(true)
 //! #     }
 //! #     fn is_low(&self) -> Result<bool, Self::Error> {
 //! #         Ok(false)
+//! #     }
+//! # }
+//! # impl OutputPin for PinType {
+//! #     type Error = core::convert::Infallible;
+//! #     fn set_high(&mut self) -> Result<(), Self::Error> {
+//! #         Ok(())
+//! #     }
+//! #     fn set_low(&mut self) -> Result<(), Self::Error> {
+//! #         Ok(())
 //! #     }
 //! # }
 //! # use unflappable::{debouncer_uninit, Debouncer, default::ActiveLow};
@@ -91,14 +101,24 @@
 //! #       Error
 //! #   }
 //! # }
-//! # fn get_pin_from_hardware() -> PinType {
+//! # impl From<core::convert::Infallible> for Error {
+//! #   fn from(_: core::convert::Infallible) -> Error {
+//! #       Error
+//! #   }
+//! # }
+//! # fn get_pin_from_hardware(_: usize) -> PinType {
 //! #   PinType
 //! # }
 //! fn try_main() -> Result<(), Error> {
-//!     let input_pin = get_pin_from_hardware();
-//!     let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }?;
+//!     let switch_pin = get_pin_from_hardware(33);
+//!     let mut led_pin = get_pin_from_hardware(42);
+//!     let debounced_switch = unsafe { DEBOUNCER.init(switch_pin) }?;
 //!
-//!     // ...
+//!     loop {
+//!         if debounced_switch.is_high()? {
+//!             led_pin.set_high()?;
+//!         }
+//!     }
 //!
 //!     Ok(())
 //! }
