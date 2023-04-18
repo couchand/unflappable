@@ -104,7 +104,7 @@
 //! }
 //! ```
 //!
-//! See the docs on the [`init()`](Debounce#method.init) method for
+//! See the docs on the [`init()`](Debouncer#method.init) method for
 //! safety details.  Generally, if you haven't yet enabled interrupts
 //! you'll be fine.
 //!
