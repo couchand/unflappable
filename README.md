@@ -56,7 +56,7 @@ requires Rust 1.61.
 
 ## Comparison to other debounce crates
 
-There are at least three debouncing crates targeting embedded Rust
+There are a handful of debouncing crates targeting embedded Rust
 development.  How does this one compare to the others?
 
 - Crate: `unflappable`
