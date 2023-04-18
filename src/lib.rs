@@ -353,11 +353,9 @@ impl<'a, Cfg: Debounce> core::fmt::Debug for DeinitError<'a, Cfg> {
 /// Since this needs to be shared between the main application code and
 /// the interupt service routine, it is generally put into a static.
 ///
-/// For technical reasons the zero value of the storage type
-/// [`Debounce::Storage`](Debounce#associatedtype.Storage) must be
-/// provided this type's constructor.  For this reason, the preferred
-/// way to create a `Debouncer` is with the macro
-/// [`debouncer_uninit!`](debouncer_uninit).
+/// The preferred way to create one is with the macro
+/// [`debouncer_uninit!`](debouncer_uninit), which can be evaluated in
+/// a `const` context.
 ///
 /// ```
 /// # struct PinType;
@@ -371,7 +369,7 @@ impl<'a, Cfg: Debounce> core::fmt::Debug for DeinitError<'a, Cfg> {
 /// #     }
 /// # }
 /// use unflappable::{debouncer_uninit, Debouncer, default::ActiveLow};
-/// static PIN_DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
+/// static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
 /// ```
 ///
 /// Later, in your main application code, you can initialize it with
