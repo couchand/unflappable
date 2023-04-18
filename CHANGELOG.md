@@ -9,9 +9,12 @@ Like most crates in the Rust ecosystem this project adheres to
 
 ## [Unreleased]
 
-*nothing yet*
+### Changed
 
-# [v0.1.0] ([Log][v0.1.0-log])
+- The feature flag `#[const_fn]` has been removed (thanks Dave O!).
+- The MSRV has been set to 1.61.
+
+## [v0.1.0] - 2020-08-12 ([Log][v0.1.0-log])
 
 - Initial release of `unflappable`.
 - Wraps the `InputPin`, returning a moveable `impl InputPin`.
