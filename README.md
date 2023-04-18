@@ -69,6 +69,11 @@ development.  How does this one compare to the others?
   - Can move wrapped pin: No
   - Algorithm: Differentiation-based by [Greensted]
   - State overhead: `u8` + `enum`
+- Crate: [`embedded-controls`]
+  - Wraps `switch_hal::InputSwitch`: **Yes**
+  - Can move wrapped pin: No
+  - Algorithm: Timestamp-based
+  - State overhead: timestamp + `enum`
 - Crate: [`bounced`]
   - Wraps `InputPin`: No
   - Can move wrapped pin: N/A
@@ -107,6 +112,7 @@ to the GitHub mirror are also acceptable.
 [Kuhn]: http://www.kennethkuhn.com/electronics/debounce.c
 [`debounced-pin`]: https://github.com/Winseven4lyf/rust-debounced-pin
 [Greensted]: http://www.labbookpages.co.uk/electronics/debounce.html#soft
+[`embedded-controls`]: https://github.com/kusstas/embedded-controls
 [`bounced`]: https://github.com/brendanarciszewski/debounced-signals
 [`debouncr`]: https://github.com/dbrgn/debouncr/
 [Ganssle]: http://www.ganssle.com/debouncing-pt2.htm
