@@ -9,6 +9,10 @@ Like most crates in the Rust ecosystem this project adheres to
 
 ## [Unreleased]
 
+- *nothing yet*
+
+## [v0.2.0] - 2023-04-18 ([Log][v0.2.0-log])
+
 ### Changed
 
 - The feature flag `#[const_fn]` has been removed (thanks Dave O!).
@@ -25,5 +29,7 @@ Like most crates in the Rust ecosystem this project adheres to
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 [Unreleased]: https://git.sr.ht/~couch/unflappable/log
+[v0.2.0]: https://git.sr.ht/~couch/unflappable/refs/v0.2.0
+[v0.2.0-log]: https://git.sr.ht/~couch/unflappable/log/v0.2.0
 [v0.1.0]: https://git.sr.ht/~couch/unflappable/refs/v0.1.0
 [v0.1.0-log]: https://git.sr.ht/~couch/unflappable/log/v0.1.0

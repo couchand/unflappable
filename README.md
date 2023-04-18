@@ -15,7 +15,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-unflappable = "0.1"
+unflappable = "0.2"
 ```
 
 Create an uninitialized [`Debouncer`] in static storage.
@@ -91,8 +91,8 @@ to the GitHub mirror are also acceptable.
 [embedded-hal]: https://github.com/rust-embedded/embedded-hal
 [API Documentation]: https://docs.rs/unflappable
 [rust-lang/rust#67792]: https://github.com/rust-lang/rust/issues/67792
-[`Debouncer`]: https://docs.rs/unflappable/0.1.0/unflappable/struct.Debouncer.html
-[`Debounced`]: https://docs.rs/unflappable/0.1.0/unflappable/struct.Debounced.html
+[`Debouncer`]: https://docs.rs/unflappable/0.2.0/unflappable/struct.Debouncer.html
+[`Debounced`]: https://docs.rs/unflappable/0.2.0/unflappable/struct.Debounced.html
 [`InputPin`]: https://docs.rs/embedded-hal/0.2.4/embedded_hal/digital/v2/trait.InputPin.html
 [issue tracker]: https://todo.sr.ht/~couch/unflappable
 [mailing list]: https://lists.sr.ht/~couch/unflappable-dev

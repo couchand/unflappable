@@ -1,6 +1,6 @@
 [package]
 name = "unflappable"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Andrew Dona-Couch <unflappable@andrewcou.ch>"]
 edition = "2018"
 description = "A batteries-included embedded-hal InputPin debouncer."

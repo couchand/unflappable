@@ -42,7 +42,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! unflappable = "0.1"
+//! unflappable = "0.2"
 //! ```
 //!
 //! Your implementation will consist of three major steps:
@@ -175,7 +175,7 @@
 
 #![no_std]
 #![deny(missing_docs)]
-#![doc(html_root_url = "https://docs.rs/unflappable/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/unflappable/0.2.0")]
 
 use core::cell::UnsafeCell;
 use core::convert::Infallible;
