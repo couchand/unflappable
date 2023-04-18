@@ -13,6 +13,7 @@ Like most crates in the Rust ecosystem this project adheres to
 
 - The feature flag `#[const_fn]` has been removed (thanks Dave O!).
 - The MSRV has been set to 1.61.
+- Usage documentation has been improved.
 
 ## [v0.1.0] - 2020-08-12 ([Log][v0.1.0-log])
 
