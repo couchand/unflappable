@@ -151,7 +151,7 @@
 //! [0]: https://github.com/rust-embedded/embedded-hal
 //! [1]: http://www.kennethkuhn.com/electronics/debounce.c
 //! [2]: https://github.com/rust-lang/rust/issues/67792
-//! [3]: https://docs.rs/embedded-hal/0.2.4/embedded_hal/digital/v2/trait.InputPin.html
+//! [3]: https://docs.rs/embedded-hal/0.2.7/embedded_hal/digital/v2/trait.InputPin.html
 
 #![no_std]
 #![deny(missing_docs)]
