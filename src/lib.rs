@@ -85,11 +85,23 @@
 //! # }
 //! # use unflappable::{debouncer_uninit, Debouncer, default::ActiveLow};
 //! # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
-//! # fn main() -> Result<(), unflappable::InitError> {
-//! #     let input_pin = PinType;
-//! let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }?;
-//! #     Ok(())
+//! # struct Error;
+//! # impl From<unflappable::InitError> for Error {
+//! #   fn from(_: unflappable::InitError) -> Error {
+//! #       Error
+//! #   }
 //! # }
+//! # fn get_pin_from_hardware() -> PinType {
+//! #   PinType
+//! # }
+//! fn try_main() -> Result<(), Error> {
+//!     let input_pin = get_pin_from_hardware();
+//!     let debounced_pin = unsafe { DEBOUNCER.init(input_pin) }?;
+//!
+//!     // ...
+//!
+//!     Ok(())
+//! }
 //! ```
 //!
 //! See the docs on the [`init()`](Debounce#method.init) method for
@@ -116,12 +128,19 @@
 //! # static DEBOUNCER: Debouncer<PinType, ActiveLow> = debouncer_uninit!();
 //! # let input_pin = PinType;
 //! # let _ = unsafe { DEBOUNCER.init(input_pin) }.unwrap();
-//! # fn main() -> Result<(), unflappable::PollError<core::convert::Infallible>> {
-//! unsafe {
-//!     DEBOUNCER.poll()?;
-//! }
-//! #    Ok(())
+//! # struct Error;
+//! # impl From<unflappable::PollError<core::convert::Infallible>> for Error {
+//! #   fn from(_: unflappable::PollError<core::convert::Infallible>) -> Error {
+//! #     Error
+//! #   }
 //! # }
+//! fn try_isr() -> Result<(), Error> {
+//!     unsafe {
+//!         DEBOUNCER.poll()?;
+//!     }
+//!
+//!     Ok(())
+//! }
 //! ```
 //!
 //! Again, see the docs on the relevant method for safety information.
