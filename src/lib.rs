@@ -828,6 +828,7 @@ impl<'state, Cfg: Debounce> InputPin for Debounced<'state, Cfg> {
 }
 
 #[cfg(test)]
+#[allow(clippy::bool_assert_comparison)]
 mod test {
     use super::*;
 
