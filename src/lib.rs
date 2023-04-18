@@ -16,10 +16,8 @@
 //!
 //! # Minimum supported Rust version
 //!
-//! This crate makes use of trait bounds on a `const fn`, which is
-//! currently unstable.  Therefore, we require use of the nightly
-//! compiler.  When [rust-lang/rust#67792][2] stabilizes, we will
-//! establish a MSRV policy.
+//! This crate makes use of trait bounds on a `const fn`, which
+//! requires Rust 1.61.
 //!
 //! # Usage
 //!
